@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Histograma";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<style>
+    #loadingMessage{
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+
+<div id="loadingMessage"></div>
+<canvas id="histogram" width="400" height="400"></canvas>
+
+<script>
+    $(document).ready(function () {
+        getData();
+    });
+
+    function getData() {
+        $("#loadingMessage").html('<img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="" srcset="">');
+        $.ajax({
+            url: "/api/locations/histogram",
+            success: function (result) {
+                $("#loadingMessage").html("");
+                var data = [];
+                $.map(result, function (val, i) {
+                    data.push(val.numOfFrequenters);
+                });
+                var labels = $.map(result, function (val, i) {
+                    return val.numOfLocations;
+                });
+                renderChart(data, labels);
+            }
+        })
+    }
+
+    function renderChart(data, labels) {
+        var context = document.getElementById("histogram").getContext("2d");
+        var myChart = new Chart(context, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Número de Frequentadores',
+                data: data,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+        });
+    }
+</script>

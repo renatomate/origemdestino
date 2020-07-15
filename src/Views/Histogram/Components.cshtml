@@ -1,0 +1,23 @@
+@model IList<OrigemDestino.Core.Graph>
+
+<html>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Tamanho da Componente</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var component in Model.GroupBy(m => m.Nodes.Count()).OrderBy(m => m.Key))
+            {
+                <tr>
+                    <td>@component.Key</td>
+                    <td>@component.Count()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

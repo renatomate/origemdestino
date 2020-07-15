@@ -1,0 +1,89 @@
+﻿@{
+    ViewData["Title"] = "Simulação";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+<script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<style>
+    #loadingMessage {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+
+<div id="loadingMessage"></div>
+<canvas id="graph" width="400" height="400"></canvas>
+
+<script>
+    $(document).ready(function () {
+        getData();
+    });
+
+    function getData() {
+        var color = Chart.helpers.color;
+
+        $("#loadingMessage").html('<img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="" srcset="">');
+        $.ajax({
+            url: "/api/simulation",
+            success: function (result) {
+                $("#loadingMessage").html("");
+                var barCharData = {
+                    labels: $.map(result, function (val, i) {
+                        return val.step;
+                    }),
+                    datasets: [
+                        {
+                            label: "Infectados",
+                            backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                            borderColor: window.chartColors.red,
+                            borderWidth: 1,
+                            data: $.map(result, function (val, i) {
+                                return val.infectedCount;
+                            })
+                        },
+                        {
+                            label: "Suscetíveis",
+                            backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+                            borderColor: window.chartColors.blue,
+                            borderWidth: 1,
+                            data: $.map(result, function (val, i) {
+                                return val.susceptibleCount;
+                            })
+                        },
+                        {
+                            label: "Recuperados",
+                            backgroundColor: color(window.chartColors.green).alpha(0.5).rgbString(),
+                            borderColor: window.chartColors.green,
+                            borderWidth: 1,
+                            data: $.map(result, function (val, i) {
+                                return val.removedCount;
+                            })
+                        }
+                    ]
+                }
+                renderChart(barCharData);
+            }
+        })
+    }
+
+    function renderChart(barChartData) {
+        var context = document.getElementById("graph").getContext("2d");
+        var myChart = new Chart(context, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+</script>
